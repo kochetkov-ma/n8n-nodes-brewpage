@@ -1,11 +1,11 @@
 # BrewPage for n8n
 
 <a href="https://www.npmjs.com/package/n8n-nodes-brewpage"><img height="18" alt="npm n8n-nodes-brewpage" src="https://img.shields.io/npm/v/n8n-nodes-brewpage?label=n8n-nodes-brewpage"></a>
-<a href="https://github.com/kochetkov-ma/brewpage-publish-plugins/actions/workflows/n8n-community-node-provenance.yml"><img height="18" alt="n8n node CI" src="https://github.com/kochetkov-ma/brewpage-publish-plugins/actions/workflows/n8n-community-node-provenance.yml/badge.svg"></a>
-<a href="https://github.com/kochetkov-ma/brewpage-publish-plugins/blob/main/LICENSE"><img height="18" alt="license MIT" src="https://img.shields.io/badge/license-MIT-green"></a>
+<a href="https://github.com/kochetkov-ma/n8n-nodes-brewpage/actions/workflows/ci.yml"><img height="18" alt="CI" src="https://github.com/kochetkov-ma/n8n-nodes-brewpage/actions/workflows/ci.yml/badge.svg"></a>
+<a href="https://github.com/kochetkov-ma/n8n-nodes-brewpage/blob/main/LICENSE"><img height="18" alt="license MIT" src="https://img.shields.io/badge/license-MIT-green"></a>
 
-Part of [BrewPage publishing plugins](https://github.com/kochetkov-ma/brewpage-publish-plugins#readme) for
-[BrewPage](https://brewpage.app).
+n8n community node for [BrewPage](https://brewpage.app). Other BrewPage integrations:
+[BrewPage publishing plugins](https://github.com/kochetkov-ma/brewpage-publish-plugins#readme).
 
 Publish HTML and Markdown reports as temporary HTTPS reader links. No signup,
 credentials or API key. The node installs no runtime dependency; its only peer
@@ -15,8 +15,8 @@ template.
 
 ## Use
 
-On self-hosted n8n, install `n8n-nodes-brewpage@0.1.3` through **Settings →
-Community nodes** after npm publication and accept the native unverified-code
+On self-hosted n8n, install `n8n-nodes-brewpage` through **Settings →
+Community nodes** and accept the native unverified-code
 notice. Add **BrewPage**, choose **Publish Report**, select HTML or Markdown,
 and map Content from a previous node, for example `={{ $json.report }}`.
 Choose Access explicitly and set Lifetime from 1 to 30 days (default 15).
@@ -48,7 +48,7 @@ Credential/response redaction in this node does not guarantee platform-wide
 secrecy.
 
 The only network destination is `https://brewpage.app/api/html`. Requests send
-`User-Agent: brewpage-n8n/0.1.3 (+https://brewpage.app)`. Redirects are disabled.
+`User-Agent: brewpage-n8n/0.1.4 (+https://brewpage.app)`. Redirects are disabled.
 Every failure throws an n8n `NodeOperationError` with one fixed message and no
 original error or response; there is no automatic retry, because a timed-out
 publication may already exist.
@@ -56,17 +56,22 @@ Requests time out after 60 seconds and decoded responses are capped at 64 KiB.
 
 ## Development
 
-Use the private build workspace one directory above this package, with Node.js
-24.15.0 and npm 11.15.0. There run `npm ci --ignore-scripts`, `npm run build`,
-`npm run lint`, `npm run format`, `npm test`, `npm run test:provenance`,
-`npm run test:native` (Docker).
-Native target: n8n 2.44.7,
-`n8n-workflow` 2.44.2 for development (the host supplies it at runtime); CLI 0.55.5, TypeScript 5.9.3,
-Prettier 3.9.10. The separate private build root applies the compatible `qs`
-6.16.2 patch without any override in this published package.
-The official CLI programmatic starter supplies the package/config conventions;
-its `new` command also initializes Git, so these files were adapted directly
-from its installed templates without mutating Git.
+The repository follows the layout of n8n's
+[starter template](https://github.com/n8n-io/n8n-nodes-starter): `package.json`,
+`nodes/` and the build config live at the root. The node has no credentials.
+Use Node.js 24 and npm 11:
+
+```sh
+npm ci --ignore-scripts
+npm run format
+npm run lint
+npm run build
+npm test
+npm run test:native   # Docker: runs the built node inside n8n 2.44.7
+```
+
+Development pins: `@n8n/node-cli` 0.55.5, `n8n-workflow` 2.44.2 (the host
+supplies it at runtime), TypeScript 5.9.3, Prettier 3.9.10.
 
 ## Host dependency advisory
 
@@ -81,42 +86,16 @@ node's input limits do not establish host-wide immunity.
 
 ## Publication and provenance
 
-Source: [integrations/n8n-community-node/package](https://github.com/kochetkov-ma/brewpage-publish-plugins/tree/main/integrations/n8n-community-node/package).
-The manual `n8n-community-node-provenance.yml` workflow runs for a reviewed
-public main commit. Its build job formats, builds, tests, runs four native
-engine fixtures and packs once, without OIDC permission. A separate sign job
-downloads only that same run's artifact and signs the exact tarball with npm
-11.15.0's unmodified native provenance generator and real workflow OIDC identity.
-The catalog job runs the unmodified official `n8n-node lint`, which passes.
+Releases are published only by GitHub Actions. Pushing a `vX.Y.Z` tag that
+matches `package.json` runs [`publish.yml`](.github/workflows/publish.yml):
+format, unit and native checks, then `npm run release`, which lints, builds and
+publishes with an npm provenance statement through npm trusted publishing
+(GitHub OIDC). No registry token is stored in the repository. Verify a release
+with `npm audit signatures` or on the package's npm page.
 
-With the `publish` input set, a publish job runs only after the sign and catalog
-jobs pass. It re-verifies the same-run tarball and bundle, checks that the
-version is not yet on the registry, and publishes that verified tarball once
-through npm trusted publishing (GitHub OIDC). npm generates the registry
-provenance in the publish job itself, for the same run, commit and workflow; the
-sign job's bundle stays a release artifact for local verification. No registry
-token is stored in the repository or in CI. The npm package names this
-repository and workflow file as its trusted publisher.
-
-To verify a downloaded release artifact locally with npm 11.15.0:
-
-```sh
-node scripts/provenance.cjs verify /absolute/path/to/npm release/n8n-nodes-brewpage-0.1.3.tgz release/n8n-nodes-brewpage-0.1.3.sigstore REVIEWED_40_HEX_SHA https://github.com/kochetkov-ma/brewpage-publish-plugins/actions/runs/RUN_ID/attempts/ATTEMPT
-```
-
-The npm directory is the ordinary pinned CLI installation, containing its
-`package.json`, `bin` and bundled `node_modules`; it is not an auth/config path.
-Verification checks exact packed files and metadata, package PURL/SHA-512,
-native Sigstore validity, certificate workflow identity/issuer and source/run
-binding. It does not repack. Signatures establish origin, not code safety.
-Before signature generation, every packed file and the node source must also
-match the committed reviewed `release-baseline.json`. Build summaries cannot
-override this independent content check.
-
-After publication, read the exact registry version, verify the anonymous
-download's integrity and registry attestation, and test a real self-hosted
-registry installation separately. A passing lint does not mean verified or Cloud
-admission; the documented unverified npm route is for self-hosted instances.
+Versions up to 0.1.3 were published from
+[brewpage-publish-plugins](https://github.com/kochetkov-ma/brewpage-publish-plugins);
+this repository carries their history.
 
 Official guidance:
 [node CLI](https://docs.n8n.io/connect/create-nodes/build-your-node/using-the-n8n-node-tool/),

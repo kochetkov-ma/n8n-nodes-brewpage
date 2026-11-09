@@ -147,7 +147,7 @@ test("HTML and Markdown publish exact bounded requests and only safe reader meta
             ...(row.access === "public" ? { ns: "public" } : {}),
           },
           headers: {
-            "User-Agent": "brewpage-n8n/0.1.3 (+https://brewpage.app)",
+            "User-Agent": "brewpage-n8n/0.1.4 (+https://brewpage.app)",
             Accept: "application/json",
           },
           body: { content: input.content, format: row.format },

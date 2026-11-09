@@ -1,17 +1,19 @@
 {
   "name": "n8n-nodes-brewpage",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Publish HTML and Markdown reports to temporary BrewPage reader links",
   "license": "MIT",
   "author": {
     "name": "Maksim Kochetkov",
     "email": "apmatypa88@gmail.com"
   },
-  "homepage": "https://brewpage.app",
+  "homepage": "https://github.com/kochetkov-ma/n8n-nodes-brewpage#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kochetkov-ma/brewpage-publish-plugins.git",
-    "directory": "integrations/n8n-community-node/package"
+    "url": "git+https://github.com/kochetkov-ma/n8n-nodes-brewpage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kochetkov-ma/n8n-nodes-brewpage/issues"
   },
   "keywords": [
     "n8n-community-node-package",
@@ -27,10 +29,12 @@
   "scripts": {
     "build": "n8n-node build",
     "lint": "n8n-node lint",
-    "format": "prettier --check nodes tests scripts package.json tsconfig.json README.md",
+    "lint:fix": "n8n-node lint --fix",
+    "format": "prettier --check nodes tests package.json tsconfig.json README.md CHANGELOG.md",
     "test": "node --test tests/publish.test.cjs",
     "test:native": "node --test tests/native.test.cjs",
-    "test:provenance": "node --test tests/provenance.test.cjs"
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
@@ -41,7 +45,10 @@
     ]
   },
   "devDependencies": {
-    "n8n-workflow": "2.44.2"
+    "@n8n/node-cli": "0.55.5",
+    "n8n-workflow": "2.44.2",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
