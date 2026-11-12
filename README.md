@@ -9,17 +9,30 @@ n8n community node for [BrewPage](https://brewpage.app). Other BrewPage integrat
 
 Publish HTML and Markdown reports as temporary HTTPS reader links. No signup,
 credentials or API key. The node installs no runtime dependency; its only peer
-is `n8n-workflow`, which the n8n host provides. This package is an unverified
-self-hosted community node, separate from the existing BrewPage workflow
-template.
+is `n8n-workflow`, which the n8n host provides.
+
+## Install
+
+BrewPage is a verified community node, available on n8n Cloud and self-hosted
+n8n. An instance owner or admin installs it once from the nodes panel; then every
+member can use it:
+
+1. On the canvas, open the nodes panel with **+** or by pressing **N**.
+2. Search for **BrewPage**; it appears under **More from the community**.
+3. Select it and choose **Install**.
+
+See n8n's guide to
+[installing verified community nodes](https://docs.n8n.io/integrations/community-nodes/installation-and-management/install-verified-community-nodes/).
+Self-hosted instances that hide verified nodes can still install the npm package
+`n8n-nodes-brewpage` through **Settings → Community nodes**
+([GUI installation](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation/)).
 
 ## Use
 
-On self-hosted n8n, install `n8n-nodes-brewpage` through **Settings →
-Community nodes** and accept the native unverified-code
-notice. Add **BrewPage**, choose **Publish Report**, select HTML or Markdown,
+Add **BrewPage**, choose **Publish Report**, select HTML or Markdown,
 and map Content from a previous node, for example `={{ $json.report }}`.
-Choose Access explicitly and set Lifetime from 1 to 30 days (default 15).
+Choose Access explicitly. Lifetime is under **Options → Lifetime (Days)**:
+1 to 30 days, default 15 when the option is not added.
 Content must be nonempty and at most 5 MiB in UTF-8.
 Content, Format and Access expressions must return strings; structured values
 are rejected before any request.
@@ -34,8 +47,10 @@ are rejected before any request.
 - `link` is the reader address BrewPage returned: `https://brewpage.app/<namespace>/<id>`
   or the page's own host `https://<label>.brewpage.app/` (HTML in the unlisted
   namespace). A successful create is never reported as a failure.
-- Ownership tokens are deliberately discarded: this node cannot update or delete
-  a publication. Do not publish material that needs early deletion.
+- Ownership tokens are discarded: this node cannot update or delete
+  publications, and content expires automatically. Do not publish material that
+  needs early deletion. Disable workflow execution saving and avoid pinned data
+  for sensitive inputs.
 - Publish only reports intended for sharing. Do not include secrets or personal
   data. This node has no password option.
 
@@ -48,7 +63,7 @@ Credential/response redaction in this node does not guarantee platform-wide
 secrecy.
 
 The only network destination is `https://brewpage.app/api/html`. Requests send
-`User-Agent: brewpage-n8n/0.1.4 (+https://brewpage.app)`. Redirects are disabled.
+`User-Agent: brewpage-n8n/0.1.5 (+https://brewpage.app)`. Redirects are disabled.
 Every failure throws an n8n `NodeOperationError` with one fixed message and no
 original error or response; there is no automatic retry, because a timed-out
 publication may already exist.

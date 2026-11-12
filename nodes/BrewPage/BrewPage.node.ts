@@ -7,7 +7,8 @@ import {
   type INodeTypeDescription,
 } from "n8n-workflow";
 
-const USER_AGENT = "brewpage-n8n/0.1.4 (+https://brewpage.app)";
+const USER_AGENT = "brewpage-n8n/0.1.5 (+https://brewpage.app)";
+const DEFAULT_TTL = 15;
 const NOT_CONFIRMED =
   "Publication was not confirmed. Check nonempty content (up to 5 MiB), format, access and lifetime (1–30 days). Check for an existing publication before retrying.";
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -99,23 +100,25 @@ export class BrewPage implements INodeType {
         required: true,
         default: "",
         description:
-          "HTML or Markdown report, up to 5 MiB in UTF-8. Do not include secrets or personal data.",
+          "HTML or Markdown report, up to 5 MiB in UTF-8. Do not include secrets or personal data. Ownership tokens are discarded: this node cannot update or delete publications, and content expires automatically. Disable workflow execution saving and avoid pinned data for sensitive inputs.",
       },
       {
-        displayName: "Lifetime (Days)",
-        name: "ttl",
-        type: "number",
-        default: 15,
-        typeOptions: { minValue: 1, maxValue: 30, numberPrecision: 0 },
-        description:
-          "Requested retention, 1–30 days. Existing identical content may keep its earlier expiry.",
-      },
-      {
-        displayName:
-          "Ownership tokens are discarded. This node cannot update or delete publications. Content expires automatically. Disable workflow execution saving and avoid pinned data for sensitive inputs.",
-        name: "retentionNotice",
-        type: "notice",
-        default: "",
+        displayName: "Options",
+        name: "options",
+        type: "collection",
+        placeholder: "Add option",
+        default: {},
+        options: [
+          {
+            displayName: "Lifetime (Days)",
+            name: "ttl",
+            type: "number",
+            default: DEFAULT_TTL,
+            typeOptions: { minValue: 1, maxValue: 30, numberPrecision: 0 },
+            description:
+              "Requested retention, 1–30 days (default 15). Existing identical content may keep its earlier expiry.",
+          },
+        ],
       },
     ],
   };
@@ -149,7 +152,11 @@ async function publishItem(
   const content = context.getNodeParameter("content", index);
   const format = context.getNodeParameter("format", index);
   const access = context.getNodeParameter("access", index);
-  const ttl = context.getNodeParameter("ttl", index);
+  const options = context.getNodeParameter("options", index, {});
+  const ttl =
+    options && typeof options === "object" && "ttl" in options
+      ? (options as { ttl: unknown }).ttl
+      : DEFAULT_TTL;
   if (
     typeof content !== "string" ||
     content.trim().length === 0 ||

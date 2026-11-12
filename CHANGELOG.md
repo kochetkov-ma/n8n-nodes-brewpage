@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.5
+
+- Lifetime (Days) moved into an Options collection; it defaults to 15 days when
+  not added. Workflows that set Lifetime before 0.1.5 publish with 15 days until
+  it is set again under Options.
+- The retention notice left the node form; its guidance is now in the Content
+  field description and the README.
+- README describes installing the verified node from the n8n nodes panel.
+
 ## 0.1.4
 
 - Moved to its own repository in the n8n starter layout:

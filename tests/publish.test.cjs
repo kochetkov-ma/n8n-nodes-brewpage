@@ -12,7 +12,7 @@ const input = {
   content: "<h1>Fixture</h1>",
   format: "html",
   access: "unlisted",
-  ttl: 15,
+  options: { ttl: 15 },
 };
 const reply = {
   id: "AbCdEf1234",
@@ -27,7 +27,7 @@ const reply = {
 function context(parameters, response, calls) {
   return {
     getInputData: () => [{ json: { source: "INPUT_SENTINEL" } }],
-    getNodeParameter: (name) => parameters[name],
+    getNodeParameter: (name, _index, fallback) => parameters[name] ?? fallback,
     getNode: () => ({
       name: "BrewPage",
       type: "n8n-nodes-brewpage.brewPage",
@@ -98,25 +98,34 @@ test("HTML and Markdown publish exact bounded requests and only safe reader meta
       "https://n-team-abcdefghij.brewpage.app/",
       true,
     ],
+    [
+      "html",
+      "unlisted",
+      undefined,
+      "my",
+      "https://my-abcdefghij.brewpage.app/",
+      false,
+    ],
   ].map(([format, access, ttl, namespace, link, merged]) => ({
     format,
     access,
-    ttl,
+    options: ttl === undefined ? {} : { ttl },
+    ttl: ttl ?? 15,
     namespace,
     link,
     merged,
   }));
   assert.equal(
     cases.length,
-    7,
-    "Fixture covers every format x access and each create link shape",
+    8,
+    "Fixture covers every format x access, each create link shape and the default lifetime",
   );
   for (const row of cases) {
     const parameters = {
       ...input,
       format: row.format,
       access: row.access,
-      ttl: row.ttl,
+      options: row.options,
     };
     const calls = [];
     // WHEN native execute receives a service response containing ownership fields.
@@ -147,7 +156,7 @@ test("HTML and Markdown publish exact bounded requests and only safe reader meta
             ...(row.access === "public" ? { ns: "public" } : {}),
           },
           headers: {
-            "User-Agent": "brewpage-n8n/0.1.4 (+https://brewpage.app)",
+            "User-Agent": "brewpage-n8n/0.1.5 (+https://brewpage.app)",
             Accept: "application/json",
           },
           body: { content: input.content, format: row.format },
@@ -190,9 +199,10 @@ test("invalid inputs and unsafe or failed responses throw one sanitized NodeOper
       patch: { content: "😀".repeat(1310721) },
       calls: 0,
     },
-    { name: "fractional ttl", patch: { ttl: 1.5 }, calls: 0 },
-    { name: "high ttl", patch: { ttl: 31 }, calls: 0 },
-    { name: "low ttl", patch: { ttl: 0 }, calls: 0 },
+    { name: "fractional ttl", patch: { options: { ttl: 1.5 } }, calls: 0 },
+    { name: "high ttl", patch: { options: { ttl: 31 } }, calls: 0 },
+    { name: "low ttl", patch: { options: { ttl: 0 } }, calls: 0 },
+    { name: "string ttl", patch: { options: { ttl: "15" } }, calls: 0 },
     { name: "format", patch: { format: "txt" }, calls: 0 },
     { name: "access", patch: { access: "protected" }, calls: 0 },
     { name: "format array expression", patch: { format: ["html"] }, calls: 0 },
@@ -290,7 +300,7 @@ test("invalid inputs and unsafe or failed responses throw one sanitized NodeOper
   ];
   assert.equal(
     cases.length,
-    49,
+    50,
     "Fixture matrix covers every reserved backend label and required rejection",
   );
   for (const row of cases) {

@@ -22,7 +22,7 @@
         "content": "<h1>Local fixture</h1>",
         "format": "html",
         "access": "unlisted",
-        "ttl": 15
+        "options": {}
       }
     }
   ],
