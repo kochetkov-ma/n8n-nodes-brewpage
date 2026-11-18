@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Publish HTML pages that save visitor answers, with Page data settings in Options.
+- Use an existing owner credential to retain author access and request a custom domain.
+- Keep ordinary anonymous reports and saved workflow node version 1 unchanged.
+
 ## 0.1.5
 
 - Lifetime (Days) moved into an Options collection; it defaults to 15 days when

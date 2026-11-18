@@ -14,7 +14,7 @@
     {
       "id": "publish",
       "name": "BrewPage",
-      "type": "CUSTOM.brewPage",
+      "type": "n8n-nodes-brewpage.brewPage",
       "typeVersion": 1,
       "position": [250, 0],
       "parameters": {

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-brewpage",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Publish HTML and Markdown reports to temporary BrewPage reader links",
   "license": "MIT",
   "author": {
@@ -30,7 +30,7 @@
     "build": "n8n-node build",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
-    "format": "prettier --check nodes tests package.json tsconfig.json README.md CHANGELOG.md",
+    "format": "prettier --check nodes credentials tests package.json tsconfig.json README.md CHANGELOG.md",
     "test": "node --test tests/publish.test.cjs",
     "test:native": "node --test tests/native.test.cjs",
     "release": "n8n-node release",
@@ -39,7 +39,9 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": [],
+    "credentials": [
+      "dist/credentials/BrewPageOwnerApi.credentials.js"
+    ],
     "nodes": [
       "dist/nodes/BrewPage/BrewPage.node.js"
     ]
